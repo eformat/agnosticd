@@ -1,0 +1,53 @@
+---
+# Implement your Workload deployment tasks here
+
+- name: check if user is cluster admin
+  shell: "oc get project default"
+  register: default_project_result
+  ignore_errors: true
+  changed_when: false
+
+- fail:
+    msg: "User does not have cluster-admin rights to install software"
+  when: default_project_result is failed
+
+- name: Setting up workload for user
+  debug:
+    msg: "Setting up workload for user ocp_username = {{ocp_username}}"
+
+- name: Check if Keycloak Operator was already provisioned
+  command: "oc get service sso -n {{ocp_operator_project}}"
+  register: sso_already_installed
+  ignore_errors: true
+  changed_when: false
+
+- name: Install Keycloak into {{ocp_operator_project}}
+  block:
+    - name: Deploy Keycloak_crd
+      command: "oc apply -f https://raw.githubusercontent.com/eformat/keycloak-operator/master/deploy/crds/Keycloak_crd.yaml"
+
+    - name: Deploy KeycloakRealm_crd
+      command: "oc apply -f https://raw.githubusercontent.com/eformat/keycloak-operator/master/deploy/crds/KeycloakRealm_crd.yaml"
+
+    - name: "Create operator project"
+      shell: "oc new-project {{ocp_operator_project}} --description='{{operator_project_description}}' --display-name={{ocp_operator_project}}"  
+
+    - name: Deploy rbac.yaml
+      command: "oc apply -f https://raw.githubusercontent.com/eformat/keycloak-operator/master/deploy/rbac.yaml -n {{ocp_operator_project}}"
+
+    - name: Deploy operator.yaml
+      command: "oc apply -f https://raw.githubusercontent.com/eformat/keycloak-operator/master/deploy/operator.yaml -n {{ocp_operator_project}}"
+
+    - name: Deploy Keycloak
+      command: "oc apply -f https://raw.githubusercontent.com/eformat/keycloak-operator/master/deploy/examples/keycloak_min.json -n {{ocp_operator_project}}"
+
+    - name: Deploy Realm
+      command: "oc apply -f https://raw.githubusercontent.com/eformat/keycloak-operator/master/deploy/examples/keycloakRealm.json -n {{ocp_operator_project}}"
+
+  when: sso_already_installed is failed
+
+# Leave this as the last task in the playbook.
+- name: workload tasks complete
+  debug:
+    msg: "Workload Tasks completed successfully."
+  when: not silent|bool

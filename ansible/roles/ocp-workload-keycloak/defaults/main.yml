@@ -1,0 +1,10 @@
+---
+become_override: False
+ocp_username: kubeadmin
+silent: False
+
+ocp_operator_project: keycloak-operator
+operator_project_description: 'Keycloak Operator'
+ocp_project: keycloak
+project_description: 'Keycloak'
+app_name: minexample

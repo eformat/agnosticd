@@ -1,0 +1,29 @@
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: rh_sso
+    challenge: false
+    login: true
+    mappingInfo: add
+    provider:
+      apiVersion: v1
+      kind: OpenIDIdentityProvider
+      clientID: ocp-web
+      clientSecret: f1bd73a3-e420-42b8-9855-b61e23819b74
+      ca: xpaas.crt
+      urls:
+        authorize: https://sso-keycloak-operator.apps.foo.91ef.sandbox295.opentlc.com/auth/realms/arealm/protocol/openid-connect/auth
+        token: https://sso-keycloak-operator.apps.foo.91ef.sandbox295.opentlc.com/auth/realms/arealm/protocol/openid-connect/token
+        userInfo: https://sso-keycloak-operator.apps.foo.91ef.sandbox295.opentlc.com/auth/realms/arealm/protocol/openid-connect/userinfo
+      claims:
+        id:
+        - sub
+        preferredUsername:
+        - preferred_username
+        name:
+        - name
+        email:
+        - email
