@@ -1,0 +1,24 @@
+= ocp4-workload-rhoai-workshop - Deploy TL500 infrastructure
+
+== Role overview
+
+* This role installs link:https://github.com/odh-labs/rhoai-roadshow-v2[RHOAI RoadShow] content into OpenShift
+** Playbook: link:./tasks/workload.yml[workload.yml]
+
+=== Deploy a Workload with the `ocp-workload` playbook
+
+----
+TARGET_HOST="localhost"
+USERNAME="rhpds-user"
+WORKLOAD="ocp4-workload-rhoai-workshop"
+GUID=guid
+
+# a TARGET_HOST is specified in the command line, without using an inventory file
+ansible-playbook -i ${TARGET_HOST}, ./configs/ocp-workloads/ocp-workload.yml \
+    -e"ansible_ssh_private_key_file=~/.ssh/id_rsa" \
+    -e"ansible_user=${USERNAME}" \
+    -e"ocp_workload=${WORKLOAD}" \
+    -e"silent=False" \
+    -e"guid=${GUID}" \
+    -e"ACTION=create"
+----
